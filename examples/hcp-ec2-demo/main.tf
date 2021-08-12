@@ -52,7 +52,7 @@ resource "hcp_consul_cluster_root_token" "token" {
 }
 
 module "aws_hcp_route" {
-  source                    = "../../modules/aws_hcp_route"
+  source                    = "crhino/hcp-demo/aws//modules/aws_hcp_route"
   hvn                       = hcp_hvn.main
   vpc_region                = var.region
   vpc_cidr_block            = module.vpc.vpc_cidr_block
@@ -64,7 +64,7 @@ module "aws_hcp_route" {
 
 module "aws_ec2_consul_client" {
   depends_on              = [hcp_consul_cluster.main_consul_cluster]
-  source                  = "../../modules/aws_ec2_consul_client"
+  source                  = "crhino/hcp-demo/aws//modules/aws_ec2_consul_client"
   subnet_id               = module.vpc.public_subnets[0]
   security_group_id       = module.vpc.default_security_group_id
   hvn_cidr_block          = hcp_hvn.main.cidr_block

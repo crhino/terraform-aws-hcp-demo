@@ -1,31 +1,20 @@
 /*
  *
- * Required Variables
+ * Optional Variables
  *
  */
 
 variable "cluster_id" {
   type        = string
   description = "The name of your HCP Consul cluster"
+  default     = "hcp-consul-tf-cluster"
 }
-
-/*
- *
- * Optional Variables
- *
- */
 
 variable "region" {
   type        = string
   description = "The AWS region to create resources in"
   default     = "us-west-2"
 }
-
-# variable "vpc_cidr_block" {
-#   type        = string
-#   description = "The CIDR block to create the VPC in"
-#   default     = "172.25.16.0/20"
-# }
 
 variable "hvn_id" {
   type        = string
