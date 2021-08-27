@@ -1,3 +1,29 @@
+locals {
+  ingress_consul_rules = [
+    {
+      description = "Consul LAN Serf (tcp)"
+      port        = 8301
+      protocol    = "tcp"
+    },
+    {
+      description = "Consul LAN Serf (udp)"
+      port        = 8301
+      protocol    = "udp"
+    },
+  ]
+
+  hcp_consul_security_groups = flatten([
+    for _, sg in var.security_group_ids : [
+      for _, rule in local.ingress_consul_rules : {
+        security_group_id = sg
+        description       = rule.description
+        port              = rule.port
+        protocol          = rule.protocol
+      }
+    ]
+  ])
+}
+
 terraform {
   required_providers {
     aws = {
@@ -11,53 +37,20 @@ terraform {
   }
 }
 
-provider "aws" {
-  region = var.region
-}
-
-data "aws_availability_zones" "available" {}
-
-module "vpc" {
-  source  = "terraform-aws-modules/vpc/aws"
-  version = "2.78.0"
-
-  name                 = "${var.cluster_id}-vpc"
-  cidr                 = "10.0.0.0/16"
-  azs                  = data.aws_availability_zones.available.names
-  private_subnets      = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
-  public_subnets       = ["10.0.4.0/24", "10.0.5.0/24", "10.0.6.0/24"]
-  enable_nat_gateway   = true
-  single_nat_gateway   = true
-  enable_dns_hostnames = true
-}
-
-# The HVN created in HCP
-resource "hcp_hvn" "main" {
-  hvn_id         = var.hvn_id
-  cloud_provider = "aws"
-  region         = var.region
-  cidr_block     = var.hvn_cidr_block
-}
-
-resource "hcp_consul_cluster" "main_consul_cluster" {
-  cluster_id      = var.cluster_id
-  hvn_id          = hcp_hvn.main.hvn_id
-  public_endpoint = var.enable_public_url
-  size            = var.size
-  tier            = var.tier
-}
-
-resource "hcp_consul_cluster_root_token" "token" {
-  cluster_id = hcp_consul_cluster.main_consul_cluster.cluster_id
-}
-
 module "aws_hcp_route" {
   source                    = "./modules/aws_hcp_route"
-  hvn                       = hcp_hvn.main
-  vpc_region                = var.region
-  vpc_cidr_block            = module.vpc.vpc_cidr_block
-  vpc_id                    = module.vpc.vpc_id
-  owner_id                  = module.vpc.vpc_owner_id
-  route_table_ids           = module.vpc.public_route_table_ids
-  number_of_route_table_ids = length(module.vpc.public_route_table_ids)
+  hvn                       = var.hvn_id
+  vpc_id                    = var.vpc_id
+  route_table_ids           = var.route_table_ids
+}
+
+resource "aws_security_group_rule" "hcp_consul" {
+  count             = length(local.hcp_consul_security_groups)
+  description       = local.hcp_consul_security_groups[count.index].description
+  protocol          = local.hcp_consul_security_groups[count.index].protocol
+  security_group_id = local.hcp_consul_security_groups[count.index].security_group_id
+  cidr_blocks       = [data.hcp_hvn.selected.cidr_block]
+  from_port         = local.hcp_consul_security_groups[count.index].port
+  to_port           = local.hcp_consul_security_groups[count.index].port
+  type              = "ingress"
 }

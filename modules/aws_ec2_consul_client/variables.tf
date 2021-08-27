@@ -3,11 +3,6 @@ variable "subnet_id" {
   description = "The subnet ID to create EC2 clients in"
 }
 
-variable "hvn_cidr_block" {
-  type        = string
-  description = "The CIDR block of the HVN."
-}
-
 variable "allowed_ssh_cidr_blocks" {
   description = "A list of CIDR-formatted IP address ranges from which the EC2 Instances will allow SSH connections"
   type        = list(string)

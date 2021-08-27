@@ -4,56 +4,22 @@
  *
  */
 
-variable "cluster_id" {
-  type        = string
-  description = "The name of your HCP Consul cluster"
-  default     = "hcp-consul-tf-cluster"
-}
-
-/*
- *
- * Optional Variables
- *
- */
-
-variable "region" {
-  type        = string
-  description = "The AWS region to create resources in"
-  default     = "us-west-2"
-}
-
-# variable "vpc_cidr_block" {
-#   type        = string
-#   description = "The CIDR block to create the VPC in"
-#   default     = "172.25.16.0/20"
-# }
-
 variable "hvn_id" {
   type        = string
-  description = "The name of your HCP HVN"
-  default     = "hvn-terraform"
+  description = "The ID of your HCP HVN"
 }
 
-variable "hvn_cidr_block" {
+variable "vpc_id" {
   type        = string
-  description = "The CIDR range to create the HCP HVN with"
-  default     = "172.25.32.0/20"
+  description = "The ID of your AWS VPC"
 }
 
-variable "enable_public_url" {
-  type        = bool
-  description = "A boolean that determines whether the Consul cluster has a public URL"
-  default     = false
+variable "route_table_ids" {
+  type        = list(string)
+  description = "A list of route table IDs which to add the HVN CIDR"
 }
 
-variable "size" {
-  type        = string
-  description = "The HCP Consul size to use when creating a Consul cluster"
-  default     = null
-}
-
-variable "tier" {
-  type        = string
-  description = "The HCP Consul tier to use when creating a Consul cluster"
-  default     = "development"
+variable "security_group_ids" {
+  type        = list(string)
+  description = "A list of security group IDs which to allow Consul client traffic"
 }

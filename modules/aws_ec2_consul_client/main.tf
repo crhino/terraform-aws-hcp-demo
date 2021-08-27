@@ -32,14 +32,6 @@ resource "aws_security_group_rule" "allow_ssh_inbound" {
   security_group_id = var.security_group_id
 }
 
-module "consul_client_sec_grp_rules" {
-  source  = "hashicorp/consul/aws//modules/consul-client-security-group-rules"
-  version = "0.10.1"
-
-  allowed_inbound_cidr_blocks = [var.hvn_cidr_block]
-  security_group_id           = var.security_group_id
-}
-
 resource "aws_instance" "consul_client" {
   for_each                    = local.clients
   ami                         = data.aws_ami.ubuntu.id

@@ -51,23 +51,21 @@ resource "hcp_consul_cluster_root_token" "token" {
   cluster_id = hcp_consul_cluster.main_consul_cluster.cluster_id
 }
 
-module "aws_hcp_route" {
-  source                    = "crhino/hcp-demo/aws//modules/aws_hcp_route"
-  hvn                       = hcp_hvn.main
-  vpc_region                = var.region
-  vpc_cidr_block            = module.vpc.vpc_cidr_block
+module "aws_hcp_consul" {
+  depends_on = [hcp_hvn.main]
+  source                    = "../../../terraform-aws-hcp-demo"
+  hvn_id                    = hcp_hvn.main.hvn_id
   vpc_id                    = module.vpc.vpc_id
-  owner_id                  = module.vpc.vpc_owner_id
   route_table_ids           = module.vpc.public_route_table_ids
-  number_of_route_table_ids = length(module.vpc.public_route_table_ids)
+  security_group_ids        = [module.vpc.default_security_group_id]
 }
 
 module "aws_ec2_consul_client" {
-  depends_on              = [hcp_consul_cluster.main_consul_cluster]
-  source                  = "crhino/hcp-demo/aws//modules/aws_ec2_consul_client"
+  depends_on              = [hcp_consul_cluster.main_consul_cluster, module.aws_hcp_consul]
+  # source                  = "crhino/hcp-demo/aws//modules/aws_ec2_consul_client"
+  source                  = "../../modules/aws_ec2_consul_client"
   subnet_id               = module.vpc.public_subnets[0]
   security_group_id       = module.vpc.default_security_group_id
-  hvn_cidr_block          = hcp_hvn.main.cidr_block
   allowed_ssh_cidr_blocks = ["0.0.0.0/0"]
   client_config_file      = hcp_consul_cluster.main_consul_cluster.consul_config_file
   client_ca_file          = hcp_consul_cluster.main_consul_cluster.consul_ca_file

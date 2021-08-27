@@ -31,7 +31,7 @@ variable "hvn_cidr_block" {
 variable "enable_public_url" {
   type        = bool
   description = "A boolean that determines whether the Consul cluster has a public URL"
-  default     = false
+  default     = true
 }
 
 variable "size" {
