@@ -39,7 +39,7 @@ terraform {
 
 module "aws_hcp_route" {
   source                    = "./modules/aws_hcp_route"
-  hvn                       = var.hvn_id
+  hvn_id                    = var.hvn_id
   vpc_id                    = var.vpc_id
   route_table_ids           = var.route_table_ids
 }

@@ -61,7 +61,7 @@ module "aws_hcp_consul" {
 }
 
 module "aws_ec2_consul_client" {
-  depends_on              = [hcp_consul_cluster.main_consul_cluster, module.aws_hcp_consul]
+  depends_on              = [module.aws_hcp_consul]
   # source                  = "crhino/hcp-demo/aws//modules/aws_ec2_consul_client"
   source                  = "../../modules/aws_ec2_consul_client"
   subnet_id               = module.vpc.public_subnets[0]
